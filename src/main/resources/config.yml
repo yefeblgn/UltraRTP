@@ -1,0 +1,385 @@
+# ============================================================
+#   UltraRTP  -  Rastgele Işınlanma Sistemi
+#   Paper 1.21.8  |  Java 21
+#   https://github.com/yefeblgn
+#
+#   Renk/format için MiniMessage kullanılır:
+#   <red>, <#FF0000>, <gradient:#A:#B>, <bold>, <b> ...
+#
+#   NOT: Bu dosya UTF-8 kodlamalıdır. Düzenlerken editörünüzün
+#   UTF-8 ile kaydettiğinden emin olun (Notepad++ / VS Code).
+# ============================================================
+
+general:
+  # Mesaj dili -> plugins/UltraRTP/lang/<dil>.yml
+  # Hazır gelenler: tr, en   (kendi dosyanı ekleyip buraya yazabilirsin)
+  language: tr
+  # Güvenli bir konum bulmak için maksimum deneme sayısı.
+  max-attempts: 45
+  # Denemeler arası bekleme (tick). Yüksek değer = daha az TPS etkisi, daha yavaş.
+  attempt-delay-ticks: 1
+  # Aynı anda kaç oyuncu konum araması yapabilir (chunk üretimi ağırdır).
+  max-concurrent-searches: 4
+  # Konsola detaylı log basar.
+  debug: false
+  # Cooldown/istatistik verileri kaç saniyede bir diske yazılsın.
+  autosave-seconds: 300
+
+# ============================================================
+#  ENTEGRASYONLAR
+#  Her biri "enabled: false" yapılarak tamamen kapatılabilir.
+#  Eklenti sunucuda yoksa otomatik olarak devre dışı kalır.
+# ============================================================
+hooks:
+  # Vault -> ekonomi (ücretli ışınlanma, /rtp back ücreti)
+  vault:
+    enabled: true
+
+  # PlaceholderAPI -> %ultrartp_...% placeholder'ları + mesajlarda %papi% desteği
+  placeholderapi:
+    enabled: true
+    # Mesaj ve menü metinlerinde diğer eklentilerin placeholder'ları da çözümlensin mi
+    # (örn. lang dosyasında %vault_eco_balance% yazabilirsin)
+    parse-in-messages: true
+
+  # ItemsAdder -> menü ikonlarında özel eşya kullanımı
+  # Örnek:  icon: "itemsadder:rtp_icons:portal_orb"
+  #         icon: "ia:mymod:ruby"
+  #         icon: "mymod:ruby"
+  itemsadder:
+    enabled: true
+    fallback-material: ENDER_PEARL
+
+# Önceden hazırlanan konum deposu -> ışınlanma anlık olur.
+cache:
+  enabled: true
+  # Her bölge için depoda tutulacak hazır konum sayısı.
+  size-per-region: 8
+  # Kaç saniyede bir depo doldurulmaya çalışılsın.
+  refill-interval-seconds: 30
+  # Her turda bölge başına en fazla kaç yeni konum üretilsin.
+  max-generate-per-cycle: 2
+  # Sunucuda hiç oyuncu yoksa üretimi durdur.
+  pause-when-empty: true
+
+teleport:
+  warmup:
+    enabled: true
+    seconds: 5
+    # Oyuncu hareket ederse iptal edilsin mi.
+    cancel-on-move: true
+    # Kaç blokluk hareket iptal sayılsın.
+    move-threshold: 0.6
+    # Hasar alırsa iptal edilsin mi.
+    cancel-on-damage: true
+
+  cooldown:
+    enabled: true
+    seconds: 120
+    # true  -> tek ortak bekleme süresi (tüm bölgeler için)
+    # false -> her bölgenin kendi bekleme süresi ayrı işlenir
+    shared: true
+    # Sunucu yeniden başlatılınca bekleme süreleri korunsun mu.
+    persist: true
+    # ultrartp.cooldown.<isim> yetkisi olanlar için özel süreler.
+    # Birden fazla yetkisi varsa en düşük süre uygulanır.
+    groups:
+      vip: 60
+      mvp: 30
+
+  cost:
+    enabled: true
+    amount: 250.0
+    # Güvenli konum bulunamazsa para iade edilsin mi.
+    refund-on-fail: true
+
+  # Işınlandıktan sonra kaç saniye hasar almasın (0 = kapalı).
+  invulnerability-seconds: 5
+  # Işınlanma sonrası düşme hasarı sıfırlansın mı.
+  reset-fall-damage: true
+  # Işınlanmadan önce oyuncunun bindiği şeyden inmesi sağlansın mı.
+  dismount-before: true
+
+  # /rtp back -> bir önceki konuma geri dön
+  back:
+    enabled: true
+    cost: 100.0
+    # Kaç saniye içinde geri dönebilir (0 = sınırsız).
+    expire-seconds: 300
+
+safety:
+  # Ayak/kafa hizasında bu bloklar varsa konum reddedilir.
+  unsafe-blocks:
+    - LAVA
+    - FIRE
+    - SOUL_FIRE
+    - CAMPFIRE
+    - SOUL_CAMPFIRE
+    - MAGMA_BLOCK
+    - CACTUS
+    - SWEET_BERRY_BUSH
+    - WITHER_ROSE
+    - POWDER_SNOW
+    - POINTED_DRIPSTONE
+    - LAVA_CAULDRON
+    - END_PORTAL
+    - END_GATEWAY
+    - NETHER_PORTAL
+    - COBWEB
+  # Zemin olarak kabul edilmeyen bloklar.
+  unsafe-ground:
+    - LAVA
+    - MAGMA_BLOCK
+    - POWDER_SNOW
+    - CACTUS
+    - CAMPFIRE
+    - SOUL_CAMPFIRE
+    - ICE
+    - BLUE_ICE
+    - PACKED_ICE
+  # Su üstüne/içine ışınlanabilsin mi.
+  allow-water: false
+  # Kafanın üzerinde blok varsa (mağara / yer altı) reddet.
+  avoid-under-roof: true
+  # Tavan taraması kaç blok yukarı baksın.
+  roof-scan-limit: 45
+  # Ayak hizasından itibaren kaç blok boşluk gerekli.
+  required-air-above: 2
+  min-y: -48
+  max-y: 250
+  # Çevrede bu yarıçapta lav/ateş varsa reddet (0 = kapalı).
+  danger-scan-radius: 2
+  # Dünya sınırını (worldborder) dikkate al.
+  respect-world-border: true
+  # Bu biyomlara ışınlandırma.
+  blocked-biomes:
+    - minecraft:ocean
+    - minecraft:deep_ocean
+    - minecraft:cold_ocean
+    - minecraft:deep_cold_ocean
+    - minecraft:frozen_ocean
+    - minecraft:deep_frozen_ocean
+    - minecraft:lukewarm_ocean
+    - minecraft:deep_lukewarm_ocean
+    - minecraft:warm_ocean
+    - minecraft:river
+    - minecraft:frozen_river
+    - minecraft:beach
+
+# ============================================================
+#  BÖLGELER
+#  shape  : SQUARE | CIRCLE
+#  center : WORLD_SPAWN | PLAYER | FIXED
+#  icon   : Material adı VEYA ItemsAdder id ("ia:namespace:id")
+#  cost / cooldown / min-y / max-y : -1 = genel ayarı kullan
+# ============================================================
+default-region: overworld
+
+regions:
+  overworld:
+    enabled: true
+    display-name: "<gradient:#7CFC8F:#2ECC71><bold>Vahşi Doğa</bold></gradient>"
+    icon: GRASS_BLOCK
+    slot: 20
+    world: world
+    shape: SQUARE
+    center: WORLD_SPAWN
+    center-x: 0
+    center-z: 0
+    min-radius: 750
+    max-radius: 7500
+    permission: ""
+    cost: -1
+    cooldown: -1
+    lore:
+      - "<gray>Yüzey dünyasında rastgele"
+      - "<gray>bir noktaya ışınlanırsın."
+
+  nether:
+    enabled: true
+    display-name: "<gradient:#FF7A5A:#C0392B><bold>Nether</bold></gradient>"
+    icon: NETHERRACK
+    slot: 22
+    world: world_nether
+    shape: SQUARE
+    center: FIXED
+    center-x: 0
+    center-z: 0
+    min-radius: 250
+    max-radius: 2500
+    permission: "ultrartp.region.nether"
+    cost: 500
+    cooldown: 240
+    avoid-under-roof: false
+    min-y: 20
+    max-y: 110
+    lore:
+      - "<gray>Cehennemin derinliklerinde"
+      - "<gray>güvenli bir noktaya ışınlanırsın."
+
+  end:
+    enabled: true
+    display-name: "<gradient:#D6A6FF:#7B2FF7><bold>The End</bold></gradient>"
+    icon: END_STONE
+    slot: 24
+    world: world_the_end
+    shape: CIRCLE
+    center: FIXED
+    center-x: 0
+    center-z: 0
+    min-radius: 1200
+    max-radius: 6000
+    permission: "ultrartp.region.end"
+    cost: 750
+    cooldown: 300
+    lore:
+      - "<gray>End adalarında rastgele"
+      - "<gray>bir noktaya ışınlanırsın."
+
+  yakin:
+    enabled: false
+    display-name: "<gradient:#FFD86B:#F39C12><bold>Yakın Keşif</bold></gradient>"
+    icon: COMPASS
+    slot: 30
+    world: world
+    shape: CIRCLE
+    center: PLAYER
+    center-x: 0
+    center-z: 0
+    min-radius: 150
+    max-radius: 900
+    permission: ""
+    cost: 50
+    cooldown: 45
+    lore:
+      - "<gray>Bulunduğun noktanın çevresinde"
+      - "<gray>kısa mesafeli ışınlanma."
+
+# ============================================================
+#  EFEKTLER
+#  Parçacık adları: Bukkit Particle enum (PORTAL, END_ROD, FLAME...)
+#  Ses adları: minecraft ses anahtarı (entity.enderman.teleport)
+# ============================================================
+effects:
+  warmup:
+    particle:
+      enabled: true
+      type: PORTAL
+      count: 6
+      spiral: true
+      radius: 1.1
+      offset-x: 0.0
+      offset-y: 0.0
+      offset-z: 0.0
+      extra: 0.0
+      color: "#8A2BE2"
+      size: 1.2
+    sound:
+      enabled: true
+      type: block.note_block.hat
+      volume: 0.7
+      pitch: 1.4
+
+  countdown:
+    # TITLE | ACTIONBAR | BOSSBAR | BOTH | ALL | NONE
+    mode: ALL
+    bossbar-color: PURPLE
+    bossbar-overlay: NOTCHED_10
+
+  searching:
+    particle:
+      enabled: true
+      type: ENCHANT
+      count: 40
+      spiral: false
+      radius: 1.0
+      offset-x: 0.6
+      offset-y: 1.0
+      offset-z: 0.6
+      extra: 0.4
+      color: "#00D4FF"
+      size: 1.0
+    sound:
+      enabled: true
+      type: block.beacon.activate
+      volume: 0.5
+      pitch: 1.8
+
+  departure:
+    particle:
+      enabled: true
+      type: REVERSE_PORTAL
+      count: 90
+      spiral: false
+      radius: 1.0
+      offset-x: 0.4
+      offset-y: 1.0
+      offset-z: 0.4
+      extra: 0.35
+      color: "#7B2FF7"
+      size: 1.0
+    sound:
+      enabled: true
+      type: entity.enderman.teleport
+      volume: 1.0
+      pitch: 0.8
+
+  arrival:
+    particle:
+      enabled: true
+      type: END_ROD
+      count: 90
+      spiral: false
+      radius: 1.0
+      offset-x: 0.5
+      offset-y: 1.0
+      offset-z: 0.5
+      extra: 0.12
+      color: "#00D4FF"
+      size: 1.0
+    sound:
+      enabled: true
+      type: entity.player.levelup
+      volume: 0.9
+      pitch: 1.2
+
+  cancel:
+    particle:
+      enabled: true
+      type: SMOKE
+      count: 25
+      spiral: false
+      radius: 1.0
+      offset-x: 0.4
+      offset-y: 0.8
+      offset-z: 0.4
+      extra: 0.02
+      color: "#555555"
+      size: 1.0
+    sound:
+      enabled: true
+      type: block.note_block.bass
+      volume: 1.0
+      pitch: 0.6
+
+# ============================================================
+#  MENÜLER
+# ============================================================
+gui:
+  main:
+    rows: 5
+    # /rtp yazıldığında menü açılsın mı (false -> doğrudan ışınlanır)
+    open-on-plain-command: true
+    filler:
+      enabled: true
+      material: BLACK_STAINED_GLASS_PANE
+    info-slot: 4
+    random-slot: 40
+    close-slot: 44
+    back-slot: 36
+    # İkonlar (Material veya "ia:namespace:id")
+    icons:
+      info: PLAYER_HEAD
+      random: ENDER_EYE
+      close: BARRIER
+      back: ARROW

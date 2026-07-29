@@ -1,0 +1,65 @@
+name: UltraRTP
+version: '${project.version}'
+main: com.yefeblgn.ultrartp.UltraRTP
+api-version: '1.21'
+authors:
+  - yefeblgn
+description: Gelişmiş rastgele ışınlanma (RTP) sistemi - menüler, efektler, ekonomi ve admin paneli.
+website: https://github.com/yefeblgn
+softdepend:
+  - Vault
+  - PlaceholderAPI
+  - ItemsAdder
+folia-supported: false
+
+commands:
+  rtp:
+    description: Rastgele bir konuma ışınlanırsın.
+    usage: /rtp [bölge|menu|back|help]
+    aliases:
+      - randomtp
+      - wild
+      - rastgele
+      - vahsi
+  rtpadmin:
+    description: UltraRTP yönetim komutları.
+    usage: /rtpadmin [panel|reload|cache|cooldown]
+    aliases:
+      - rtpa
+      - ultrartp
+
+permissions:
+  ultrartp.use:
+    description: Temel /rtp kullanımı.
+    default: true
+  ultrartp.menu:
+    description: /rtp menu ile GUI açabilir.
+    default: true
+  ultrartp.back:
+    description: /rtp back ile önceki konuma dönebilir.
+    default: true
+  ultrartp.other:
+    description: Başka bir oyuncuyu ışınlayabilir.
+    default: op
+  ultrartp.admin:
+    description: Yönetim paneli ve tüm admin komutları.
+    default: op
+    children:
+      ultrartp.use: true
+      ultrartp.menu: true
+      ultrartp.other: true
+      ultrartp.bypass.cooldown: true
+      ultrartp.bypass.cost: true
+      ultrartp.bypass.warmup: true
+  ultrartp.bypass.cooldown:
+    description: Bekleme süresinden muaf.
+    default: false
+  ultrartp.bypass.cost:
+    description: Ücretten muaf.
+    default: false
+  ultrartp.bypass.warmup:
+    description: Işınlanma gecikmesinden muaf.
+    default: false
+  ultrartp.region.*:
+    description: Tüm bölgelere erişim.
+    default: op
