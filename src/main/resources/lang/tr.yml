@@ -67,6 +67,52 @@ back:
   expired: "<prefix><red>Geri dönme süren doldu."
   success: "<prefix><green>Önceki konumuna döndün."
 
+zone:
+  wand-name: "<gradient:#FF512F:#DD2476><bold>RTP Bölge Çubuğu</bold></gradient>"
+  wand-lore:
+    - "<dark_gray>▪ <gray>Sağ tık: <white>1. köşe"
+    - "<dark_gray>▪ <gray>Sol tık: <white>2. köşe"
+    - ""
+    - "<gray>Sonra: <yellow>/rtpzone oluştur <isim> <dünya> <sn>"
+  wand-given: "<prefix><green>Bölge seçim çubuğu verildi. <gray>Sağ tık = 1. köşe, sol tık = 2. köşe."
+  pos1-set: "<prefix><aqua>1. köşe <gray>seçildi. <dark_gray>(<x>, <y>, <z>)"
+  pos2-set: "<prefix><light_purple>2. köşe <gray>seçildi. <dark_gray>(<x>, <y>, <z>)"
+  selection-ready: "<prefix><green>Seçim tamam. <gray>Alan: <white><count> <gray>blok."
+  selection-missing: "<prefix><red>Önce çubukla iki köşe seçmelisin. <gray>/rtpzone çubuk"
+  selection-different-world: "<prefix><red>İki köşe farklı dünyalarda, tekrar seç."
+  create-usage: "<prefix><gray>Kullanım: <white>/rtpzone oluştur <isim> <dünya> <cooldown>"
+  edit-usage: "<prefix><gray>Kullanım: <white>/rtpzone düzenle <isim> <ayar> <değer>"
+  invalid-name: "<prefix><red>Geçersiz isim: <gray><value> <dark_gray>(a-z, 0-9, _ ve -)"
+  invalid-value: "<prefix><red>Geçersiz değer: <gray><value>"
+  unknown-setting: "<prefix><red>Bilinmeyen ayar: <gray><value>"
+  exists: "<prefix><red><value> adında bir bölge zaten var."
+  not-found: "<prefix><red><value> adında bir RTP bölgesi yok."
+  world-missing: "<prefix><red><value> adında yüklü bir dünya yok."
+  created: "<prefix><green><value> <gray>bölgesi oluşturuldu. <dark_gray>| <gray>Hedef: <white><world> <dark_gray>| <gray>Süre: <white><time>sn <dark_gray>| <gray>Alan: <white><count>"
+  removed: "<prefix><green><value> <gray>bölgesi silindi."
+  edited: "<prefix><green><value> <dark_gray>» <gray><setting> <dark_gray>➜ <white><result>"
+  list-empty: "<prefix><gray>Henüz bir RTP bölgesi yok. <white>/rtpzone çubuk"
+  list-header: "<prefix><gray>RTP bölgeleri <dark_gray>(<count>)"
+  list-entry: "<dark_gray> ▪ <white><value> <dark_gray>- <gray><zone> <dark_gray>| <gray><world> <dark_gray>| <gray><time>sn <dark_gray>| <status>"
+  info:
+    - "<dark_gray><strikethrough>                                        "
+    - "<gradient:#FF512F:#DD2476><bold>RTP Bölgesi</bold></gradient> <dark_gray>- <white><value>"
+    - "<dark_gray>▪ <gray>Görünen isim: <zone>"
+    - "<dark_gray>▪ <gray>Durum: <status>"
+    - "<dark_gray>▪ <gray>Bölge dünyası: <white><world>"
+    - "<dark_gray>▪ <gray>Hedef dünya: <white><target>"
+    - "<dark_gray>▪ <gray>Cooldown: <white><time>sn <dark_gray>(kalan: <remaining>)"
+    - "<dark_gray>▪ <gray>Alan: <white><bounds> <dark_gray>(<count> blok)"
+    - "<dark_gray>▪ <gray>Yarıçap: <white><min> - <max> <dark_gray>| <gray>Şekil: <white><shape>"
+    - "<dark_gray>▪ <gray>Tüm yükseklik: <height>"
+    - "<dark_gray><strikethrough>                                        "
+  empty: "<prefix><gray><value> bölgesinde şu an kimse yok."
+  triggered: "<prefix><green><value> <gray>bölgesi tetiklendi. <dark_gray>(<count> oyuncu)"
+  countdown-actionbar: "<red>⚠ <gray>Işınlanmaya <white><time> <gray>saniye!"
+  warning: "<prefix><red>⚠ <gray><time> saniye içinde ışınlanacaksın!"
+  teleported: "<prefix><gray>Bölge seni rastgele bir noktaya fırlattı."
+  failed: "<prefix><red>Bölge ışınlanması için güvenli konum bulunamadı."
+
 gui:
   main-title: "<gradient:#00D4FF:#7B2FF7><bold>Rastgele Işınlanma</bold></gradient>"
   admin-title: "<gradient:#FF512F:#DD2476><bold>RTP Yönetim Paneli</bold></gradient>"
@@ -205,4 +251,35 @@ help-admin:
   - "<red>/rtpadmin cache <info|clear|refill> <dark_gray>- <gray>Konum deposu"
   - "<red>/rtpadmin cooldown reset <oyuncu|*> <dark_gray>- <gray>Bekleme sıfırla"
   - "<red>/rtpadmin tp <oyuncu> [bölge] <dark_gray>- <gray>Oyuncuyu ışınla"
+  - "<red>/rtpzone <dark_gray>- <gray>Otomatik ışınlanma bölgeleri"
   - "<dark_gray><strikethrough>                                        "
+
+help-zone:
+  - "<dark_gray><strikethrough>                                        "
+  - "<gradient:#FF512F:#DD2476><bold>RTP Bölgeleri</bold></gradient> <dark_gray>- <gray>/rtpzone"
+  - ""
+  - "<red>/rtpzone çubuk <dark_gray>- <gray>Seçim çubuğunu al"
+  - "<gray>  Sağ tık = 1. köşe <dark_gray>|</dark_gray> Sol tık = 2. köşe"
+  - "<red>/rtpzone oluştur <isim> <dünya> <cooldown> <dark_gray>- <gray>Bölge oluştur"
+  - "<red>/rtpzone liste <dark_gray>- <gray>Bölgeleri listele"
+  - "<red>/rtpzone bilgi <isim> <dark_gray>- <gray>Bölge detayları"
+  - "<red>/rtpzone düzenle <isim> <ayar> <değer> <dark_gray>- <gray>Bölgeyi düzenle"
+  - "<red>/rtpzone kaldır <isim> <dark_gray>- <gray>Bölgeyi sil"
+  - "<red>/rtpzone ışınla <isim> <dark_gray>- <gray>Hemen tetikle"
+  - ""
+  - "<gray>Ayarlar: <white>dünya, cooldown, aktif, isim,"
+  - "<white>  min-yarıçap, max-yarıçap, şekil, yükseklik, seçim"
+  - "<dark_gray><strikethrough>                                        "
+
+# ==========================================================================
+#   BEDROCK (GEYSER) FORM MENUSU
+#   Bedrock oyuncular sandik menusu yerine kendi yerel arayuzlerini gorur.
+#   Buton metinlerinde \n ile alt satira gecilebilir.
+# ==========================================================================
+bedrock:
+  summary: "<gray>Oyuncu: <white><player>\n<gray>Bakiye: <green><balance>\n<gray>Toplam ışınlanma: <yellow><count>"
+  region-button: "<white><region>\n<status>"
+  locked: "<red>Kilitli"
+  cooldown: "<red>Bekleme: <time>"
+  cost: "<gold><cost>"
+  free: "<green>Ücretsiz"

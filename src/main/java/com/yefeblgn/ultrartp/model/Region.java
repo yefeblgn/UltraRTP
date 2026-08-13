@@ -2,6 +2,7 @@ package com.yefeblgn.ultrartp.model;
 
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.MemoryConfiguration;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -31,6 +32,8 @@ public final class Region {
     private final boolean enabled;
     private final String displayName;
     private final String icon;
+    /** Bedrock form butonundaki gorsel: pack yolu ya da http adresi. */
+    private final String bedrockIcon;
     private final int slot;
     private final List<String> lore;
 
@@ -57,6 +60,7 @@ public final class Region {
         this.enabled = section.getBoolean("enabled", true);
         this.displayName = section.getString("display-name", "<white>" + id);
         this.icon = section.getString("icon", "GRASS_BLOCK");
+        this.bedrockIcon = section.getString("bedrock-icon", section.getString("bedrock-ikon"));
         this.slot = section.getInt("slot", -1);
         this.lore = new ArrayList<>(section.getStringList("lore"));
 
@@ -94,6 +98,24 @@ public final class Region {
         return new Region(id, section);
     }
 
+    /**
+     * config.yml'de karşılığı olmayan, bellekte üretilen bölge.
+     * {@link com.yefeblgn.ultrartp.model.Zone} gibi kendi hedefini belirleyen
+     * sistemler {@link com.yefeblgn.ultrartp.teleport.LocationFinder} ile
+     * çalışabilmek için buna ihtiyaç duyar.
+     */
+    public static Region virtual(String id, String displayName, String world,
+                                 Shape shape, int minRadius, int maxRadius) {
+        ConfigurationSection section = new MemoryConfiguration().createSection(id);
+        section.set("display-name", displayName);
+        section.set("world", world);
+        section.set("shape", (shape == null ? Shape.SQUARE : shape).name());
+        section.set("center", CenterMode.WORLD_SPAWN.name());
+        section.set("min-radius", minRadius);
+        section.set("max-radius", maxRadius);
+        return new Region(id, section);
+    }
+
     public static String normalizeBiome(String raw) {
         if (raw == null) return "";
         String value = raw.trim().toLowerCase(Locale.ROOT);
@@ -128,6 +150,11 @@ public final class Region {
 
     public Material iconFallback() {
         return Material.GRASS_BLOCK;
+    }
+
+    /** Bedrock form butonu gorseli; tanimli degilse null. */
+    public String bedrockIcon() {
+        return bedrockIcon;
     }
 
     public int slot() {

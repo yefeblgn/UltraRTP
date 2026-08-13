@@ -2,10 +2,13 @@ package com.yefeblgn.ultrartp.hook;
 
 import com.yefeblgn.ultrartp.UltraRTP;
 import com.yefeblgn.ultrartp.model.Region;
+import com.yefeblgn.ultrartp.model.Zone;
 import com.yefeblgn.ultrartp.util.Formatter;
 import com.yefeblgn.ultrartp.util.Text;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,6 +28,11 @@ import java.util.Locale;
  *  %ultrartp_regions%                  -> erişilebilen bölge sayısı
  *  %ultrartp_regions_total%            -> toplam açık bölge sayısı
  *  %ultrartp_region_name_&lt;bölge&gt;%     -> bölgenin görünen adı (renksiz)
+ *  %ultrartp_zone_time_&lt;bölge&gt;%       -> RTP bölgesi sayaç saniyesi (ör: 30, 29)
+ *  %ultrartp_zone_time_formatted_&lt;bölge&gt;% -> biçimlendirilmiş sayaç süresi (ör: 30sn)
+ *  %ultrartp_zone_interval_&lt;bölge&gt;%   -> bölgenin ayarlı süresi (sn)
+ *  %ultrartp_zone_players_&lt;bölge&gt;%    -> bölgedeki oyuncu sayısı
+ *  %ultrartp_zone_name_&lt;bölge&gt;%       -> bölgenin görünen adı
  *  %ultrartp_warmup%                   -> ayarlı gecikme (sn)
  *  %ultrartp_warmup_remaining%         -> devam eden ışınlanmanın kalan süresi
  *  %ultrartp_in_warmup%                -> true/false
@@ -104,6 +112,39 @@ public final class RTPExpansion extends PlaceholderExpansion {
             if (region == null) return "";
             double cost = region.cost() >= 0 ? region.cost() : plugin.config().costAmount();
             return plugin.economy().format(cost);
+        }
+
+        // RTPZone genel / hologram placeholder'ları (oyuncu bağımsız)
+        if (param.startsWith("zone_remaining_formatted_") || param.startsWith("zone_time_formatted_")) {
+            String zoneId = param.startsWith("zone_remaining_formatted_") ? param.substring(25) : param.substring(20);
+            Zone zone = plugin.zones().zone(zoneId);
+            if (zone == null) return "";
+            int left = plugin.zones().remaining(zone);
+            int timeToShow = left <= 0 ? zone.interval() : left;
+            return Formatter.time(timeToShow);
+        }
+        if (param.startsWith("zone_remaining_") || param.startsWith("zone_time_")) {
+            String zoneId = param.startsWith("zone_remaining_") ? param.substring(15) : param.substring(10);
+            Zone zone = plugin.zones().zone(zoneId);
+            if (zone == null) return "";
+            int left = plugin.zones().remaining(zone);
+            int timeToShow = left <= 0 ? zone.interval() : left;
+            return String.valueOf(timeToShow);
+        }
+        if (param.startsWith("zone_interval_")) {
+            Zone zone = plugin.zones().zone(param.substring(14));
+            return zone == null ? "0" : String.valueOf(zone.interval());
+        }
+        if (param.startsWith("zone_players_")) {
+            Zone zone = plugin.zones().zone(param.substring(13));
+            if (zone == null) return "0";
+            World world = Bukkit.getWorld(zone.worldName());
+            return String.valueOf(plugin.zones().playersInside(zone, world, true).size());
+        }
+        if (param.startsWith("zone_display_name_") || param.startsWith("zone_name_")) {
+            String zoneId = param.startsWith("zone_display_name_") ? param.substring(18) : param.substring(10);
+            Zone zone = plugin.zones().zone(zoneId);
+            return zone == null ? "" : Text.plain(Text.mm(zone.displayName()));
         }
 
         if (offlinePlayer == null) return "";

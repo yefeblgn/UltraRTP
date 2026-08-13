@@ -2,20 +2,25 @@ package com.yefeblgn.ultrartp;
 
 import com.yefeblgn.ultrartp.command.RTPAdminCommand;
 import com.yefeblgn.ultrartp.command.RTPCommand;
+import com.yefeblgn.ultrartp.command.RTPZoneCommand;
 import com.yefeblgn.ultrartp.config.ConfigManager;
 import com.yefeblgn.ultrartp.config.Messages;
 import com.yefeblgn.ultrartp.data.DataStore;
+import com.yefeblgn.ultrartp.gui.BedrockMenu;
 import com.yefeblgn.ultrartp.gui.ChatInputManager;
+import com.yefeblgn.ultrartp.hook.BedrockHook;
 import com.yefeblgn.ultrartp.hook.EconomyHook;
 import com.yefeblgn.ultrartp.hook.ItemsAdderHook;
 import com.yefeblgn.ultrartp.hook.PlaceholderHook;
 import com.yefeblgn.ultrartp.listener.GUIListener;
 import com.yefeblgn.ultrartp.listener.PlayerListener;
+import com.yefeblgn.ultrartp.listener.ZoneWandListener;
 import com.yefeblgn.ultrartp.teleport.EffectManager;
 import com.yefeblgn.ultrartp.teleport.LocationCache;
 import com.yefeblgn.ultrartp.teleport.LocationFinder;
 import com.yefeblgn.ultrartp.teleport.SafetyChecker;
 import com.yefeblgn.ultrartp.teleport.TeleportManager;
+import com.yefeblgn.ultrartp.zone.ZoneManager;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -38,6 +43,8 @@ public final class UltraRTP extends JavaPlugin {
     private EconomyHook economyHook;
     private PlaceholderHook placeholderHook;
     private ItemsAdderHook itemsAdderHook;
+    private BedrockHook bedrockHook;
+    private BedrockMenu bedrockMenu;
 
     private SafetyChecker safetyChecker;
     private LocationFinder locationFinder;
@@ -45,6 +52,7 @@ public final class UltraRTP extends JavaPlugin {
     private TeleportManager teleportManager;
     private EffectManager effectManager;
     private ChatInputManager chatInputManager;
+    private ZoneManager zoneManager;
 
     private BukkitTask autosaveTask;
 
@@ -75,6 +83,13 @@ public final class UltraRTP extends JavaPlugin {
         this.teleportManager = new TeleportManager(this);
         this.chatInputManager = new ChatInputManager(this);
 
+        this.zoneManager = new ZoneManager(this);
+        this.zoneManager.load();
+
+        this.bedrockHook = new BedrockHook(this);
+        this.bedrockHook.setup();
+        this.bedrockMenu = new BedrockMenu(this);
+
         this.economyHook.setup();
         this.itemsAdderHook.setup();
         this.placeholderHook.setup();
@@ -83,6 +98,7 @@ public final class UltraRTP extends JavaPlugin {
         registerCommands();
 
         this.locationCache.start();
+        this.zoneManager.start();
         startAutosave();
 
         banner();
@@ -91,6 +107,10 @@ public final class UltraRTP extends JavaPlugin {
     @Override
     public void onDisable() {
         if (teleportManager != null) teleportManager.cancelAll();
+        if (zoneManager != null) {
+            zoneManager.stop();
+            zoneManager.save();
+        }
         if (locationCache != null) locationCache.stop();
         if (autosaveTask != null) autosaveTask.cancel();
         if (placeholderHook != null) placeholderHook.shutdown();
@@ -104,6 +124,7 @@ public final class UltraRTP extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new GUIListener(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerListener(this), this);
         Bukkit.getPluginManager().registerEvents(chatInputManager, this);
+        Bukkit.getPluginManager().registerEvents(new ZoneWandListener(this), this);
     }
 
     private void registerCommands() {
@@ -119,6 +140,13 @@ public final class UltraRTP extends JavaPlugin {
         if (adminCommand != null) {
             adminCommand.setExecutor(admin);
             adminCommand.setTabCompleter(admin);
+        }
+
+        RTPZoneCommand zone = new RTPZoneCommand(this);
+        PluginCommand zoneCommand = getCommand("rtpzone");
+        if (zoneCommand != null) {
+            zoneCommand.setExecutor(zone);
+            zoneCommand.setTabCompleter(zone);
         }
     }
 
@@ -141,6 +169,8 @@ public final class UltraRTP extends JavaPlugin {
         placeholderHook.setup();
 
         locationCache.restart();
+        zoneManager.load();
+        zoneManager.restart();
         startAutosave();
     }
 
@@ -149,7 +179,8 @@ public final class UltraRTP extends JavaPlugin {
         getLogger().info("");
         getLogger().info("  UltraRTP v" + version + "  |  github.com/yefeblgn");
         getLogger().info("  Dil: " + configManager.language()
-                + "  |  Bölge: " + configManager.regions().size());
+                + "  |  Bölge: " + configManager.regions().size()
+                + "  |  RTP Zone: " + zoneManager.zones().size());
         getLogger().info("  Vault: " + yesNo(economyHook.isAvailable())
                 + "  |  PlaceholderAPI: " + yesNo(placeholderHook.isAvailable())
                 + "  |  ItemsAdder: " + yesNo(itemsAdderHook.isAvailable()));
@@ -190,6 +221,30 @@ public final class UltraRTP extends JavaPlugin {
         return itemsAdderHook;
     }
 
+    public BedrockHook bedrock() {
+        return bedrockHook;
+    }
+
+    public BedrockMenu bedrockMenu() {
+        return bedrockMenu;
+    }
+
+    /**
+     * Menuyu acar: Bedrock oyuncusuna form, digerlerine sandik menusu.
+     * Form gonderilemezse sandik menusune duser, oyuncu bos ekranla kalmaz.
+     */
+    public void openMenu(org.bukkit.entity.Player player) {
+        boolean useForm = getConfig().getBoolean("gui.bedrock-form", true)
+                && bedrockMenu != null
+                && bedrockMenu.isAvailable()
+                && bedrockHook.isBedrock(player);
+
+        if (useForm && bedrockMenu.openMain(player)) {
+            return;
+        }
+        new com.yefeblgn.ultrartp.gui.MainMenu(this, player).open();
+    }
+
     public SafetyChecker safety() {
         return safetyChecker;
     }
@@ -212,5 +267,9 @@ public final class UltraRTP extends JavaPlugin {
 
     public ChatInputManager chatInput() {
         return chatInputManager;
+    }
+
+    public ZoneManager zones() {
+        return zoneManager;
     }
 }

@@ -112,6 +112,18 @@ public final class TeleportManager {
         execute(player, region, 0.0D);
     }
 
+    /**
+     * /rtpzone tarafından tetiklenen ışınlanma: konum hazır, arama yapılmaz ve
+     * oyuncunun normal /rtp bekleme süresine dokunulmaz.
+     */
+    public void zoneTeleport(Player player, Region region, Location target) {
+        if (player == null || region == null || target == null) return;
+        if (isWarmingUp(player.getUniqueId())) {
+            cancel(player, null);
+        }
+        performTeleport(player, region, target, false);
+    }
+
     public boolean isBusy(UUID uuid) {
         return warmups.containsKey(uuid) || searching.containsKey(uuid);
     }
@@ -288,11 +300,11 @@ public final class TeleportManager {
                 return;
             }
 
-            performTeleport(player, region, location);
+            performTeleport(player, region, location, true);
         });
     }
 
-    private void performTeleport(Player player, Region region, Location target) {
+    private void performTeleport(Player player, Region region, Location target, boolean cooldown) {
         Location from = player.getLocation().clone();
 
         if (plugin.config().dismountBefore()) {
@@ -334,7 +346,7 @@ public final class TeleportManager {
                     Text.num("z", target.getBlockZ()),
                     Text.of("world", target.getWorld() == null ? "" : target.getWorld().getName()));
 
-            applyCooldown(player, region);
+            if (cooldown) applyCooldown(player, region);
             plugin.data().incrementTeleports(player.getUniqueId());
             applyInvulnerability(player);
 

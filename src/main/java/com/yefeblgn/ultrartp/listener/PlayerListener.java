@@ -61,5 +61,6 @@ public final class PlayerListener implements Listener {
         plugin.teleports().cancel(player, null);
         plugin.teleports().clearInvulnerability(player);
         plugin.chatInput().cancel(player.getUniqueId());
+        plugin.zones().handleQuit(player);
     }
 }

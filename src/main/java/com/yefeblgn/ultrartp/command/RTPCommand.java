@@ -1,7 +1,6 @@
 package com.yefeblgn.ultrartp.command;
 
 import com.yefeblgn.ultrartp.UltraRTP;
-import com.yefeblgn.ultrartp.gui.MainMenu;
 import com.yefeblgn.ultrartp.model.Region;
 import com.yefeblgn.ultrartp.util.Text;
 import org.bukkit.command.Command;
@@ -41,7 +40,7 @@ public final class RTPCommand implements CommandExecutor, TabCompleter {
 
         if (args.length == 0) {
             if (plugin.config().guiOpenOnPlainCommand() && player.hasPermission("ultrartp.menu")) {
-                new MainMenu(plugin, player).open();
+                plugin.openMenu(player);
             } else {
                 plugin.teleports().request(player, defaultRegion(player));
             }
@@ -55,7 +54,7 @@ public final class RTPCommand implements CommandExecutor, TabCompleter {
                     plugin.messages().send(player, "general.no-permission");
                     return true;
                 }
-                new MainMenu(plugin, player).open();
+                plugin.openMenu(player);
             }
             case "back", "geri", "dön", "don" -> {
                 if (!player.hasPermission("ultrartp.back")) {

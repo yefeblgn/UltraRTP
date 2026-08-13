@@ -67,12 +67,17 @@ public final class Messages {
         InputStream defaults = plugin.getResource("lang/" + selected + ".yml");
         if (defaults == null) defaults = plugin.getResource("lang/en.yml");
         if (defaults != null) {
-            lang.setDefaults(YamlConfiguration.loadConfiguration(
-                    new InputStreamReader(defaults, StandardCharsets.UTF_8)));
+            YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(
+                    new InputStreamReader(defaults, StandardCharsets.UTF_8));
+            lang.setDefaults(defConfig);
             lang.options().copyDefaults(true);
+            try {
+                lang.save(file);
+            } catch (IOException ignored) {
+            }
         }
 
-        this.prefix = lang.getString("prefix", "");
+        this.prefix = rawString("prefix");
     }
 
     private void copyResource(String resource, File target) {
@@ -94,14 +99,21 @@ public final class Messages {
     // ------------------------------------------------------------- okuma
 
     public String rawString(String path) {
-        return lang.getString(path, path);
+        String value = lang.getString(path);
+        if (value == null && lang.getDefaults() != null) {
+            value = lang.getDefaults().getString(path);
+        }
+        return value != null ? value : path;
     }
 
     public List<String> rawList(String path) {
         List<String> list = lang.getStringList(path);
+        if (list.isEmpty() && lang.getDefaults() != null) {
+            list = lang.getDefaults().getStringList(path);
+        }
         if (list.isEmpty()) {
-            String single = lang.getString(path);
-            if (single != null) {
+            String single = rawString(path);
+            if (!single.equals(path)) {
                 List<String> fallback = new ArrayList<>();
                 fallback.add(single);
                 return fallback;

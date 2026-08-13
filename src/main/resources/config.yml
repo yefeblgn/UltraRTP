@@ -180,6 +180,8 @@ regions:
     enabled: true
     display-name: "<gradient:#7CFC8F:#2ECC71><bold>Vahşi Doğa</bold></gradient>"
     icon: GRASS_BLOCK
+    # Bedrock form kartindaki gorsel (pack yolu)
+    bedrock-icon: "textures/ui/cards/rtp_overworld"
     slot: 20
     world: world
     shape: SQUARE
@@ -199,6 +201,8 @@ regions:
     enabled: true
     display-name: "<gradient:#FF7A5A:#C0392B><bold>Nether</bold></gradient>"
     icon: NETHERRACK
+    # Bedrock form kartindaki gorsel (pack yolu)
+    bedrock-icon: "textures/ui/cards/rtp_nether"
     slot: 22
     world: world_nether
     shape: SQUARE
@@ -221,6 +225,8 @@ regions:
     enabled: true
     display-name: "<gradient:#D6A6FF:#7B2FF7><bold>The End</bold></gradient>"
     icon: END_STONE
+    # Bedrock form kartindaki gorsel (pack yolu)
+    bedrock-icon: "textures/ui/cards/rtp_end"
     slot: 24
     world: world_the_end
     shape: CIRCLE
@@ -240,6 +246,8 @@ regions:
     enabled: false
     display-name: "<gradient:#FFD86B:#F39C12><bold>Yakın Keşif</bold></gradient>"
     icon: COMPASS
+    # Bedrock form kartindaki gorsel (pack yolu)
+    bedrock-icon: "textures/ui/cards/rtp_yakin"
     slot: 30
     world: world
     shape: CIRCLE
@@ -254,6 +262,22 @@ regions:
     lore:
       - "<gray>Bulunduğun noktanın çevresinde"
       - "<gray>kısa mesafeli ışınlanma."
+
+# ============================================================
+#  RTP BÖLGELERİ  (/rtpzone)
+#  Çubukla seçilen kare alanda duran oyuncular belirli aralıklarla
+#  hedef dünyada rastgele bir noktaya ışınlanır.
+#  Bölgeler plugins/UltraRTP/zones.yml içinde tutulur.
+# ============================================================
+zone:
+  # Seçim çubuğunun eşyası (sağ tık = 1. köşe, sol tık = 2. köşe)
+  wand-material: BLAZE_ROD
+  # Işınlanmaya kaç saniye kala uyarı efekti/sesi verilsin.
+  warn-seconds:
+    - 5
+    - 3
+  # Işınlanma anında TNT patlama efekti (sadece görsel, hasar vermez).
+  blast-effect: true
 
 # ============================================================
 #  EFEKTLER
@@ -361,6 +385,47 @@ effects:
       type: block.note_block.bass
       volume: 1.0
       pitch: 0.6
+
+  # /rtpzone geri sayımı (5 ve 3 saniye kala) -> oyuncunun çevresinde sütun
+  zone-warning:
+    particle:
+      enabled: true
+      type: DUST
+      # Halkadaki nokta sayısı (her nokta 5 kademe yukarı çizilir)
+      count: 12
+      spiral: false
+      radius: 1.0
+      offset-x: 0.0
+      offset-y: 0.0
+      offset-z: 0.0
+      extra: 0.0
+      color: "#FF3B3B"
+      size: 1.1
+    sound:
+      enabled: true
+      type: block.note_block.pling
+      volume: 0.9
+      pitch: 1.2
+
+  # /rtpzone ışınlanma anı -> TNT patlaması
+  zone-blast:
+    particle:
+      enabled: true
+      type: LAVA
+      count: 20
+      spiral: false
+      radius: 1.0
+      offset-x: 0.6
+      offset-y: 0.4
+      offset-z: 0.6
+      extra: 0.05
+      color: "#FF7A00"
+      size: 1.0
+    sound:
+      enabled: true
+      type: entity.generic.explode
+      volume: 1.0
+      pitch: 1.0
 
 # ============================================================
 #  MENÜLER

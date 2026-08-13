@@ -10,6 +10,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -102,6 +103,11 @@ public final class ConfigManager {
     private String countdownMode;
     private String bossbarColor;
     private String bossbarOverlay;
+
+    // zone (/rtpzone)
+    private Material zoneWandMaterial;
+    private List<Integer> zoneWarnSeconds = List.of(5, 3);
+    private boolean zoneBlastEffect;
 
     // gui
     private int guiRows;
@@ -197,10 +203,21 @@ public final class ConfigManager {
         }
         this.defaultRegion = config.getString("default-region", "overworld").toLowerCase(Locale.ROOT);
 
+        this.zoneWandMaterial = Registries.material(config.getString("zone.wand-material"), Material.BLAZE_ROD);
+        this.zoneBlastEffect = config.getBoolean("zone.blast-effect", true);
+        List<Integer> warn = new ArrayList<>();
+        for (int second : config.getIntegerList("zone.warn-seconds")) {
+            if (second > 0 && !warn.contains(second)) warn.add(second);
+        }
+        this.zoneWarnSeconds = warn.isEmpty() ? List.of(5, 3) : List.copyOf(warn);
+
         this.effects = new HashMap<>();
         for (String key : List.of("warmup", "searching", "departure", "arrival", "cancel")) {
             effects.put(key, EffectSet.load(config.getConfigurationSection("effects." + key)));
         }
+        // Eski config.yml dosyalarında bu bölümler yoktur -> gömülü varsayılana düş
+        effects.put("zone-warning", effectOr("zone-warning", EffectSet.zoneWarningDefault()));
+        effects.put("zone-blast", effectOr("zone-blast", EffectSet.zoneBlastDefault()));
         this.countdownMode = config.getString("effects.countdown.mode", "ALL").toUpperCase(Locale.ROOT);
         this.bossbarColor = config.getString("effects.countdown.bossbar-color", "PURPLE").toUpperCase(Locale.ROOT);
         this.bossbarOverlay = config.getString("effects.countdown.bossbar-overlay", "NOTCHED_10").toUpperCase(Locale.ROOT);
@@ -220,6 +237,11 @@ public final class ConfigManager {
                 guiIcons.put(key.toLowerCase(Locale.ROOT), icons.getString(key));
             }
         }
+    }
+
+    private EffectSet effectOr(String key, EffectSet fallback) {
+        ConfigurationSection section = config.getConfigurationSection("effects." + key);
+        return section == null ? fallback : EffectSet.load(section);
     }
 
     private static int clamp(int value, int min, int max) {
@@ -474,6 +496,18 @@ public final class ConfigManager {
 
     public String bossbarOverlay() {
         return bossbarOverlay;
+    }
+
+    public Material zoneWandMaterial() {
+        return zoneWandMaterial;
+    }
+
+    public List<Integer> zoneWarnSeconds() {
+        return zoneWarnSeconds;
+    }
+
+    public boolean zoneBlastEffect() {
+        return zoneBlastEffect;
     }
 
     public int guiRows() {

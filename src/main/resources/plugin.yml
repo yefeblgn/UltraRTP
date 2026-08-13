@@ -27,6 +27,12 @@ commands:
     aliases:
       - rtpa
       - ultrartp
+  rtpzone:
+    description: Otomatik ışınlanma bölgeleri (çubukla seçim).
+    usage: /rtpzone [çubuk|oluştur|liste|kaldır|düzenle|bilgi|ışınla]
+    aliases:
+      - rtpbolge
+      - rtpz
 
 permissions:
   ultrartp.use:
@@ -41,6 +47,12 @@ permissions:
   ultrartp.other:
     description: Başka bir oyuncuyu ışınlayabilir.
     default: op
+  ultrartp.zone:
+    description: /rtpzone ile otomatik ışınlanma bölgesi yönetimi.
+    default: op
+  ultrartp.zone.bypass:
+    description: RTP bölgelerinden etkilenmez (ışınlanmaz).
+    default: false
   ultrartp.admin:
     description: Yönetim paneli ve tüm admin komutları.
     default: op
@@ -48,6 +60,7 @@ permissions:
       ultrartp.use: true
       ultrartp.menu: true
       ultrartp.other: true
+      ultrartp.zone: true
       ultrartp.bypass.cooldown: true
       ultrartp.bypass.cost: true
       ultrartp.bypass.warmup: true

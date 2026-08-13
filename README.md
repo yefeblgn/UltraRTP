@@ -191,8 +191,15 @@ powershell -ExecutionPolicy Bypass -File build.ps1
 | `/rtpadmin cache <info\|clear\|refill>` | Konum deposunu yönetir | `ultrartp.admin` |
 | `/rtpadmin cooldown reset <oyuncu\|*>` | Bekleme sürelerini sıfırlar | `ultrartp.admin` |
 | `/rtpadmin tp <oyuncu> [bölge]` | Oyuncuyu zorla ışınlar | `ultrartp.admin` |
+| `/rtpzone çubuk` | Bölge seçim çubuğunu verir | `ultrartp.zone` |
+| `/rtpzone oluştur <isim> <dünya> <cooldown>` | Seçili alandan bölge oluşturur | `ultrartp.zone` |
+| `/rtpzone liste` | RTP bölgelerini listeler | `ultrartp.zone` |
+| `/rtpzone bilgi <isim>` | Bölge detaylarını gösterir | `ultrartp.zone` |
+| `/rtpzone düzenle <isim> <ayar> <değer>` | Bölge ayarını değiştirir | `ultrartp.zone` |
+| `/rtpzone kaldır <isim>` | Bölgeyi siler | `ultrartp.zone` |
+| `/rtpzone ışınla <isim>` | Bölgeyi hemen tetikler | `ultrartp.zone` |
 
-<sub>Takma adlar: `/randomtp` · `/wild` · `/rastgele` · `/vahsi` · `/rtpa`</sub>
+<sub>Takma adlar: `/randomtp` · `/wild` · `/rastgele` · `/vahsi` · `/rtpa` · `/rtpbolge` · `/rtpz`</sub>
 
 </div>
 
@@ -206,6 +213,8 @@ powershell -ExecutionPolicy Bypass -File build.ps1
 | `ultrartp.menu` | ✅ herkes | GUI menüsünü açabilir |
 | `ultrartp.back` | ✅ herkes | `/rtp back` kullanabilir |
 | `ultrartp.admin` | 🛡️ op | Panel ve tüm yönetim komutları |
+| `ultrartp.zone` | 🛡️ op | `/rtpzone` ile bölge yönetimi |
+| `ultrartp.zone.bypass` | ❌ | RTP bölgelerinden etkilenmez |
 | `ultrartp.other` | 🛡️ op | Başka oyuncuyu ışınlayabilir |
 | `ultrartp.region.<id>` | 🛡️ op | Belirli bir bölgeye erişim |
 | `ultrartp.region.*` | 🛡️ op | Tüm bölgelere erişim |

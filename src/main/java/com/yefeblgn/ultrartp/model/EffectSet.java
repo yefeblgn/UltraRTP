@@ -32,6 +32,23 @@ public record EffectSet(
                 Color.WHITE, 1.0F, false, null, 1.0F, 1.0F);
     }
 
+    /**
+     * /rtpzone geri sayım uyarısı. Eski bir config.yml'de bu bölüm bulunmadığında
+     * efektlerin sessizce kaybolmaması için kullanılır.
+     */
+    public static EffectSet zoneWarningDefault() {
+        return new EffectSet(true, Particle.DUST, 12, false, 1.0D, 0, 0, 0, 0,
+                Color.fromRGB(0xFF, 0x3B, 0x3B), 1.1F,
+                true, "minecraft:block.note_block.pling", 0.9F, 1.2F);
+    }
+
+    /** /rtpzone ışınlanma anındaki patlama. */
+    public static EffectSet zoneBlastDefault() {
+        return new EffectSet(true, Particle.LAVA, 20, false, 1.0D, 0.6D, 0.4D, 0.6D, 0.05D,
+                Color.fromRGB(0xFF, 0x7A, 0x00), 1.0F,
+                true, "minecraft:entity.generic.explode", 1.0F, 1.0F);
+    }
+
     public static EffectSet load(ConfigurationSection section) {
         if (section == null) return empty();
 
